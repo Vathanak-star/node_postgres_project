@@ -10,11 +10,11 @@ module.exports = {
           primaryKey: true,
           type: Sequelize.INTEGER
         },
-        colorCode: {
+        color: {
           type: Sequelize.STRING,
           allowNull: false
         },
-        imageBase64: {
+        image: {
           type: Sequelize.STRING,
           allowNull: false
         },

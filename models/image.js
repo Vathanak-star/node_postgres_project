@@ -7,11 +7,11 @@ module.exports = (sequelize,DataTypes) => {
     }
 
     Image.init({
-        colorCode: {
+        color: {
             type: DataTypes.STRING,
             allowNull: false
         },
-        imageBase64: {
+        image: {
             type: DataTypes.STRING,
             allowNull: false
         },
@@ -28,8 +28,6 @@ module.exports = (sequelize,DataTypes) => {
         sequelize,
         modelName: 'Image',
         underscored: false,
-        getterMethods: {},
-        setterMethods: {},
     });
 
     Image.associate = function(models){
