@@ -26,7 +26,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      specificCategory: {
+      subCategory: {
         type: Sequelize.STRING,
         allowNull: false
       },

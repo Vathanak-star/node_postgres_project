@@ -10,7 +10,6 @@ exports.dashboard = async (req,res) => {
     })
 }
 //Testing Route
-
 exports.searchForProduct = async (req,res) => {
     const {name} = req.params;
     try {
@@ -85,14 +84,14 @@ exports.findProductById = async (req,res) => {
 
 exports.createProduct = async (req,res) => {
     try {
-        const {name,price,description,mainCategory,specificCategory,size,images} = req.body;
+        const {name,price,description,mainCategory,subCategory,size,images} = req.body;
         
         const product = await Product.create({
             name,
             price,
             description,
             mainCategory,
-            specificCategory,
+            subCategory,
             size,
             images: images
         },{
