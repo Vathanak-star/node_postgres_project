@@ -1,13 +1,18 @@
 const {Router} = require('express')
-const { dashboard, createProduct, findProductById, findAllProducts, searchForProduct } = require('../controllers/post')
-const authenticateJWT = require('../middleware/authenticateJWT')
+const { createProduct, findProductById, findAllProducts, searchForProduct, updateProduct, updateProductImages, testingRoute } = require('../controllers/post')
+const authenticateJWT = require('../middleware/authenticateJWT');
+const { validtionCreateProduct } = require('../middleware/postValidation');
 const router = Router()
 
 //Testing Route
-router.get('/dashboard', authenticateJWT,dashboard);
+router.get('/testingRoute', authenticateJWT,testingRoute);
 
+//Will have protected Route
+router.post('/createProduct',validtionCreateProduct ,createProduct);
+router.post('/updateProduct/:id',updateProduct);
+router.post('/updateImageProduct/:productId',updateProductImages);
 
-router.post('/createProduct',createProduct);
+//Stay the same
 router.get('/findAllProducts',findAllProducts);
 router.get('/searchForProduct/:name',searchForProduct);
 router.get('/findProductById/:id',findProductById);

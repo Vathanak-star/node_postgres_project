@@ -127,6 +127,13 @@ exports.singleUser = async (req,res) => {
     const id = req.params.id;
     try {
         const user = await User.findByPk(id)
+        if(!user){
+            return res.statu(404).json({
+                status: 'error',
+                msg: 'User not found'
+            })
+        }
+
         return res.status(200).json({
             status: 'success',
             user
