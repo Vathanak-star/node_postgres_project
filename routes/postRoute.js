@@ -8,12 +8,12 @@ const router = Router()
 router.get('/testingRoute', authenticateJWT,testingRoute);
 
 //Will have protected Route
-router.post('/createProduct',validtionCreateProduct ,createProduct);
-router.post('/updateProduct/:id',updateProduct);
-router.post('/updateImageProduct/:productId',updateProductImages);
-router.delete('/deleteProductWithImage/:productId',deleteProductWithImage)
+router.post('/createProduct',authenticateJWT,validtionCreateProduct ,createProduct);
+router.post('/updateProduct/:id',authenticateJWT,updateProduct);
+router.post('/updateImageProduct/:productId',authenticateJWT,updateProductImages);
+router.delete('/deleteProductWithImage/:productId',authenticateJWT,deleteProductWithImage)
 
-//Stay the same
+//Stay the same: no protected Route
 router.get('/findAllProducts',findAllProducts);
 router.get('/searchForProduct/:name',searchForProduct);
 router.get('/findProductById/:id',findProductById);
