@@ -1,4 +1,4 @@
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 const db = require('../models');
 const Product = db.Product;
 const Image = db.Image;
@@ -171,6 +171,51 @@ exports.updateProductImages = async (req,res) => {
         });
     }
 }
+
+//Delete Product with it's image
+exports.deleteProductWithImage = async(req,res) => {
+    const {productId} = req.params;
+    try {
+        const findProduct = await Product.findByPk(productId)
+        if(!findProduct){
+            return res.status(404).json({
+                status: 'error',
+                msg: 'Product not found'
+            })
+        }
+
+        const deletedImage = await Image.destroy({
+            where: {productId: productId}
+        })
+        
+        const deletedProduct = await Product.destroy({
+            where: {id: productId}
+        });
+
+        if(deletedProduct < 1){
+            return res.status(404).json({
+                status: 'error',
+                msg: 'Product delete not success'
+            })
+        }
+
+        return res.status(200).json({
+            status: 'success',
+            msg: 'Deleted Product success',
+            deletedProduct: deletedProduct,
+            deleteImage: deletedImage
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            status: 'error',
+            msg: 'Internal server error.',
+            errors: error.message,
+        });
+    }
+
+}
+
 
 //Search for product with name
 exports.searchForProduct = async (req,res) => {

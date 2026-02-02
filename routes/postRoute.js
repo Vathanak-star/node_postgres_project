@@ -1,5 +1,5 @@
 const {Router} = require('express')
-const { createProduct, findProductById, findAllProducts, searchForProduct, updateProduct, updateProductImages, testingRoute } = require('../controllers/post')
+const { createProduct, findProductById, findAllProducts, searchForProduct, updateProduct, updateProductImages, testingRoute, deleteProductWithImage } = require('../controllers/post')
 const authenticateJWT = require('../middleware/authenticateJWT');
 const { validtionCreateProduct } = require('../middleware/postValidation');
 const router = Router()
@@ -11,6 +11,7 @@ router.get('/testingRoute', authenticateJWT,testingRoute);
 router.post('/createProduct',validtionCreateProduct ,createProduct);
 router.post('/updateProduct/:id',updateProduct);
 router.post('/updateImageProduct/:productId',updateProductImages);
+router.delete('/deleteProductWithImage/:productId',deleteProductWithImage)
 
 //Stay the same
 router.get('/findAllProducts',findAllProducts);
