@@ -1,10 +1,10 @@
 const {Router} = require('express')
-const { createProduct, findProductById, findAllProducts, searchForProduct, updateProduct, updateProductImages, testingRoute, deleteProductWithImage, filterByMainCategory, filterBySubCategory } = require('../controllers/post')
+const { createProduct, findProductById, findAllProducts, searchForProduct, updateProduct, updateProductImages, testingRoute, deleteProductWithImage, filterByMainCategory, filterBySubCategory, searchProductByName } = require('../controllers/post')
 const authenticateJWT = require('../middleware/authenticateJWT');
 const { validtionCreateProduct } = require('../middleware/postValidation');
 const router = Router()
 
-//Testing Route
+//Testing Route with token
 router.get('/testingRoute', authenticateJWT,testingRoute);
 
 //Will have protected Route

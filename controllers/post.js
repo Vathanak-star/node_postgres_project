@@ -216,7 +216,6 @@ exports.deleteProductWithImage = async(req,res) => {
 
 }
 
-
 //Fliter Main Category Products
 exports.filterByMainCategory = async (req,res) => {
     const {mainCategory} = req.params;
@@ -295,8 +294,8 @@ exports.searchForProduct = async (req,res) => {
     try {
         const searchForProduct = await Product.findAll({
             where: {
-                name: {
-                    [Op.iLike]: `%${name}`
+                    name: {
+                        [Op.iLike]: `%${name}%`
                 }
             },
             include: [{
@@ -311,7 +310,6 @@ exports.searchForProduct = async (req,res) => {
                 msg: 'Search products not found'
             })
         }
-
 
         return res.status(200).json(
             searchForProduct
@@ -347,7 +345,6 @@ exports.findAllProducts = async (req,res) => {
         })
     }
 }
-
 
 //search for product by ID
 exports.findProductById = async (req,res) => {
