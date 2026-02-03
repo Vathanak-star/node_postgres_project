@@ -1,5 +1,5 @@
 const {Router} = require('express')
-const { createProduct, findProductById, findAllProducts, searchForProduct, updateProduct, updateProductImages, testingRoute, deleteProductWithImage } = require('../controllers/post')
+const { createProduct, findProductById, findAllProducts, searchForProduct, updateProduct, updateProductImages, testingRoute, deleteProductWithImage, filterByMainCategory, filterBySubCategory } = require('../controllers/post')
 const authenticateJWT = require('../middleware/authenticateJWT');
 const { validtionCreateProduct } = require('../middleware/postValidation');
 const router = Router()
@@ -18,4 +18,7 @@ router.get('/findAllProducts',findAllProducts);
 router.get('/searchForProduct/:name',searchForProduct);
 router.get('/findProductById/:id',findProductById);
 
-module.exports = router
+router.get('/filterByMainCategory/:mainCategory',filterByMainCategory);
+router.get('/filterBySubCategory/:subCategory',filterBySubCategory);
+
+module.exports = router;

@@ -217,6 +217,78 @@ exports.deleteProductWithImage = async(req,res) => {
 }
 
 
+//Fliter Main Category Products
+exports.filterByMainCategory = async (req,res) => {
+    const {mainCategory} = req.params;
+    try {
+        const allProductMainCategory = await Product.findAll({
+            where: {
+                mainCategory: {
+                    [Op.iLike]: `%${mainCategory}`
+                }
+            },
+            include: [{
+                model: Image,
+                as: 'images'
+            }]
+        })
+
+        if(allProductMainCategory.length === 0){
+            return res.status(404).json({
+                status: 'error',
+                msg: 'Main category product not found'
+            })
+        }
+
+        return res.status(201).json(
+            allProductMainCategory
+        )
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            status: 'error',
+            msg: 'Internal server error',
+            errors: error.message
+        })
+    }
+}
+
+//fliter by sub category
+exports.filterBySubCategory = async (req,res) => {
+    const {subCategory} = req.params;
+    try {
+        const allProductSubCategory = await Product.findAll({
+            where: {
+                subCategory: {
+                    [Op.iLike]: `%${subCategory}`
+                }
+            },
+            include: [{
+                model: Image,
+                as: 'images'
+            }]
+        })
+
+        if(allProductSubCategory.length === 0){
+            return res.status(404).json({
+                status: 'error',
+                msg: 'Sub category product not found'
+            })
+        }
+
+        return res.status(201).json(
+            allProductSubCategory
+        )
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            status: 'error',
+            msg: 'Internal server error',
+            errors: error.message
+        })
+    }
+}
+
 //Search for product with name
 exports.searchForProduct = async (req,res) => {
     const {name} = req.params;
