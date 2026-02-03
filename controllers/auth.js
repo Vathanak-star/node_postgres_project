@@ -1,13 +1,13 @@
 const { validationResult } = require("express-validator");
 const db = require('../models');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const { hashing, hashValidation } = require("../middleware/hashing");
 const saltRound = 10
 
 require('dotenv').config();
 const User = db.User;
 
+//Create new User
 exports.register = async (req, res) => {
     const errors = validationResult(req);
 
@@ -71,6 +71,7 @@ exports.register = async (req, res) => {
     }
 };
 
+//Login account user
 exports.login = async (req,res) => {
     const error = validationResult(req);
 
@@ -123,6 +124,118 @@ exports.login = async (req,res) => {
     }
 }
 
+//Update user
+exports.updateUser = async(req,res) => {
+    const error = validationResult(req);
+
+    if(!error.isEmpty()){
+        return res.status(400).json({
+            status: 'error',
+            msg: 'Validation error',
+            errors: error.array()
+        })
+    }
+    const {id} = req.params;
+    try {
+        //Checking if json not have body object at all
+        if(req.body.constructor === Object && Object.keys(req.body).length === 0){
+            return res.status(401).json({
+                status: 'error',
+                msg: 'No information detail provided for update!'
+            })
+        }
+
+        const {name,email,password} = req.body;
+
+        const findUser = await User.findByPk(id);
+
+        if(!findUser){
+            return res.status(404).json({
+                status: 'error',
+                msg: 'User not found with that ID'
+            })
+        }
+
+        const existingUser = await User.findOne({where: { email } });
+        if (existingUser) {
+            return res.status(409).json({ 
+                status: 'error',
+                msg: 'User with this email already exists.',
+            });
+        }
+
+        const hashedPassword = await hashing(password,saltRound);
+
+        const values = {
+            name: name,
+            email: email,
+            password: hashedPassword
+        }
+
+        const condition = {
+            where: {id:id}
+        }
+
+        const options = {
+            multi: true
+        }
+
+        const userUpdated = await User.update(values,condition,options);
+
+        return res.status(201).json({
+            status: 'success',
+            msg: 'User updated successfully',
+            userUpdated: userUpdated[0]
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            status: 'error',
+            msg: 'Internal server error.',
+            errors: error.message,
+        });
+    }
+}
+
+//Delete User
+exports.deleteUser = async (req,res) => {
+    const {id} = req.params;
+    try {
+        const user = await User.findByPk(id)
+        if(!user){
+            return res.status(404).json({
+                status: 'error',
+                msg: 'User not found'
+            })
+        }
+
+        const deleteUser = await User.destroy({
+            where: {id:id}
+        })
+
+        if(deleteUser < 1){
+            return res.status(404).json({
+                status: 'error',
+                msg: 'User delete not success'
+            })
+        }
+
+        return res.status(200).json({
+            status: 'error',
+            msg: 'Deleted user success',
+            deleteUser: deleteUser
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            status: 'error',
+            msg: 'Internal server error.',
+            errors: error.message,
+        });
+    }
+}
+
+//Get a single user by ID
 exports.singleUser = async (req,res) => {
     const id = req.params.id;
     try {
@@ -149,6 +262,8 @@ exports.singleUser = async (req,res) => {
     }
 }
 
+
+//Get all user 
 exports.allUser = async (req,res) => {
     try {
         const users = await User.findAll({
