@@ -216,6 +216,7 @@ exports.deleteProductWithImage = async(req,res) => {
 
 }
 
+//Change Route
 //Fliter Main Category Products
 exports.filterByMainCategory = async (req,res) => {
     const {mainCategory} = req.params;
