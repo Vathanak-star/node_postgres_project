@@ -237,11 +237,16 @@ exports.deleteUser = async (req,res) => {
 
 //Get a single user by ID
 exports.singleUser = async (req,res) => {
-    const id = req.params.id;
+    const id = Number.parseInt(req.query.id) || 0;
     try {
-        const user = await User.findByPk(id)
-        if(!user){
-            return res.statu(404).json({
+        const data = await User.findOne(
+            {
+                where: {id: id},
+                attributes: {exclude: ['password']}
+            }
+        );
+        if(!data){
+            return res.status(404).json({
                 status: 'error',
                 msg: 'User not found'
             })
@@ -249,7 +254,7 @@ exports.singleUser = async (req,res) => {
 
         return res.status(200).json({
             status: 'success',
-            user
+            data
         })
         
     } catch (error) {
@@ -266,12 +271,12 @@ exports.singleUser = async (req,res) => {
 //Get all user 
 exports.allUser = async (req,res) => {
     try {
-        const users = await User.findAll({
+        const data = await User.findAll({
             attributes: {exclude: ['password']}
         });
         return res.status(200).json({
             status: 'success',
-            users
+            data
         })
     } catch (error) {
         console.log(error);

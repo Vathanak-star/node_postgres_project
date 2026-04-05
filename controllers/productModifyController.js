@@ -1,16 +1,58 @@
-const { Op, where } = require('sequelize');
 const db = require('../models');
 const Product = db.Product;
 const Image = db.Image;
 const { validationResult } = require("express-validator");
+const { deleteImage, imageUploadFile } = require('../utils/s3Image');
+require('dotenv').config();
 
-//For Testing Post Route
-exports.testingRoute = async (req,res) => {
-    return res.status(200).json({
-        msg: "This is route for testing with JWT Token."
-    })
+//Test Route
+exports.uploadImageFile = async (req, res) => {
+    try {
+        // Get file from request (using multer or similar middleware)
+        const file = req.file;
+        if (!file) {
+            return res.status(400).json({
+                status: 'error',
+                msg: 'No file uploaded.',
+            });
+        }
+
+        const result = await imageUploadFile(file);
+        
+        return res.status(201).json({
+            msg: 'Image Upload successfully',
+            url: result.url,
+            Key: result.Key
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            status: 'error',
+            msg: 'Internal server error.',
+            errors: error.message,
+        });
+    }
 }
-//Testing Route
+
+exports.deleteUploadImage = async (req,res) => {
+    try {
+        const {key} = req.body;
+        const result = await deleteImage(key);
+
+        return res.status(201).json({
+            message: result.message,
+            success: result.success
+        })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            status: 'error',
+            msg: 'Internal server error.',
+            errors: error.message,
+        });
+    }
+}
+//Test Route
 
 //Create or Add Product
 exports.createProduct = async (req,res) => {
@@ -22,10 +64,9 @@ exports.createProduct = async (req,res) => {
             errors: errors.array()
         })
     }
+    const {name,price,description,mainCategory,subCategory,size,images} = req.body;
 
     try {
-        const {name,price,description,mainCategory,subCategory,size,images} = req.body;
-        
         const product = await Product.create({
             name,
             price,
@@ -94,12 +135,12 @@ exports.updateProduct = async (req,res) => {
             multi: true
         }
         
-        const rowUpdated = await Product.update(values, condition, options)
+        const productUpdated = await Product.update(values, condition, options)
         
         return res.status(201).json({
                 status: 'success',
                 msg: 'Product updated successfully',
-                rowUpdated: rowUpdated[0] // if rowUpdated = 1 is success, = 0 is fail
+                productUpdated: productUpdated[0] // if rowUpdated = 1 is success, = 0 is fail
             })
     } catch (error) {
         console.error(error);
@@ -154,7 +195,7 @@ exports.updateProductImages = async (req,res) => {
 
         const updatedNewImages = await Promise.all(imageNew);
 
-        return res.status(200).json({
+        return res.status(201).json({
             status: 'success',
             msg: 'Product images updated successfully',
             data: {
@@ -173,7 +214,7 @@ exports.updateProductImages = async (req,res) => {
 }
 
 //Delete Product with it's image
-exports.deleteProductWithImage = async(req,res) => {
+exports.deleteProduct = async(req,res) => {
     const {productId} = req.params;
     try {
         const findProduct = await Product.findByPk(productId)
@@ -192,14 +233,7 @@ exports.deleteProductWithImage = async(req,res) => {
             where: {id: productId}
         });
 
-        if(deletedProduct < 1){
-            return res.status(404).json({
-                status: 'error',
-                msg: 'Product delete not success'
-            })
-        }
-
-        return res.status(200).json({
+        return res.status(201).json({
             status: 'success',
             msg: 'Deleted Product success',
             deletedProduct: deletedProduct,
@@ -216,165 +250,6 @@ exports.deleteProductWithImage = async(req,res) => {
 
 }
 
-//Change Route
-//Fliter Main Category Products
-exports.filterByMainCategory = async (req,res) => {
-    const {mainCategory} = req.params;
-    try {
-        const allProductMainCategory = await Product.findAll({
-            where: {
-                mainCategory: {
-                    [Op.iLike]: `%${mainCategory}`
-                }
-            },
-            include: [{
-                model: Image,
-                as: 'images'
-            }]
-        })
 
-        if(allProductMainCategory.length === 0){
-            return res.status(404).json({
-                status: 'error',
-                msg: 'Main category product not found'
-            })
-        }
 
-        return res.status(201).json(
-            allProductMainCategory
-        )
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            status: 'error',
-            msg: 'Internal server error',
-            errors: error.message
-        })
-    }
-}
 
-//fliter by sub category
-exports.filterBySubCategory = async (req,res) => {
-    const {subCategory} = req.params;
-    try {
-        const allProductSubCategory = await Product.findAll({
-            where: {
-                subCategory: {
-                    [Op.iLike]: `%${subCategory}`
-                }
-            },
-            include: [{
-                model: Image,
-                as: 'images'
-            }]
-        })
-
-        if(allProductSubCategory.length === 0){
-            return res.status(404).json({
-                status: 'error',
-                msg: 'Sub category product not found'
-            })
-        }
-
-        return res.status(201).json(
-            allProductSubCategory
-        )
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            status: 'error',
-            msg: 'Internal server error',
-            errors: error.message
-        })
-    }
-}
-
-//Search for product with name
-exports.searchForProduct = async (req,res) => {
-    const {name} = req.params;
-    try {
-        const searchForProduct = await Product.findAll({
-            where: {
-                    name: {
-                        [Op.iLike]: `%${name}%`
-                }
-            },
-            include: [{
-                model: Image,
-                as: 'images'
-            }]
-        })
-
-        if(searchForProduct.length === 0){
-            return res.status(404).json({
-                status: 'error',
-                msg: 'Search products not found'
-            })
-        }
-
-        return res.status(200).json(
-            searchForProduct
-        )
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            status: 'error',
-            msg: 'Internal server error',
-            errors: error.message
-        })
-    }
-}
-
-//Get all product
-exports.findAllProducts = async (req,res) => {
-    try {
-        const findAllProducts = await Product.findAll({
-            include: [{
-                model: Image,
-                as: 'images'
-            }]
-        })
-        return res.status(200).json(
-            findAllProducts
-        )
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            status: 'error',
-            msg: 'Internal server error',
-            errors: error.message
-        })
-    }
-}
-
-//search for product by ID
-exports.findProductById = async (req,res) => {
-    const {id} = req.params;
-
-    try {
-        const findProduct = await Product.findByPk(id, {
-            include: [{
-                model: Image,
-                as: 'images'
-            }]
-        })
-
-        if(!findProduct){
-            return res.status(404).json({
-                status: 'error',
-                msg: 'Product not found with that ID'
-            })
-        }
-
-        return res.status(201).json(
-            findProduct
-        )
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            status: 'error',
-            msg: 'Internal server error.',
-            errors: error.message,
-        });
-    }
-}
